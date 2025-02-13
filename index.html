@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Powerball Lottery</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(216, 198, 198, 0.7), rgba(51, 102, 80, 0.7)),
+                        url('/api/placeholder/1920/1080') center/cover;
+            color: #000000;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(215, 209, 24, 0.345);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #phone-input-container {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #phone-input {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 150px;
+        }
+
+        #numbers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .number {
+            background: rgba(9, 39, 85, 0.663);
+            padding: 8px;
+            text-align: center;
+            border-radius: 5px;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .number.selected {
+            background: rgba(235, 26, 26, 0.8);
+        }
+
+        .powerball {
+            background: rgba(255, 165, 0, 0.8);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #00a8ff, #0097e6);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .button:hover {
+            background: linear-gradient(135deg, #0097e6, #00a8ff);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #preview-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold; /* Make the whole preview bold */
+            display: flex; /* Use flexbox for inline layout */
+            justify-content: center; /* Center content horizontally */
+            align-items: center; /* Center content vertically */
+            gap: 10px; /* Add some space between the elements */
+        }
+
+        #preview-numbers {
+            color: #2e86c1; /* Blue color for numbers */
+        }
+
+        #preview-powerball {
+            color: #e67e22; /* Orange color for powerball */
+        }
+
+        #preview-sec {
+            color: #1e8449; /* Green color for phone */
+        }
+
+        #probabilities {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        #history {
+            margin-top: 15px;
+            background: rgba(240, 240, 240, 0.9);
+            padding: 12px;
+            border-radius: 8px;
+            position: relative; /* For positioning the clear history button */
+        }
+
+        #clear-history-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 0, 0, 0.7); /* Reddish background */
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .ticket {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .number {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .button {
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎰 Powerball Lottery 🎰</h1>
+            <div id="phone-input-container">
+                <label for="phone-input">Enter your phone number:</label>
+                <input type="tel" id="phone-input" placeholder="123-456-7890">
+            </div>
+            <div id="numbers-container">
+                <h3>Pick 5 Numbers (1-69):</h3>
+                <div id="main-numbers" class="number-grid">
+                    <script> for (let i = 1; i <= 69; i++) { document.write(`<div class='number' data-number='${i}'>${i}</div>`); } </script>
+                </div>
+                <h3>Pick Powerball (1-26):</h3>
+                <div id="powerball-numbers" class="number-grid">
+                    <script> for (let i = 1; i <= 26; i++) { document.write(`<div class='number powerball' data-number='${i}'>${i}</div>`); } </script>
+                </div>
+            </div>
+            <div id="preview-container">
+                <span>#: <span id="preview-numbers"></span></span>
+                <span>Powerball: <span id="preview-powerball"></span></span>
+                <span>SEC: <span id="preview-sec"></span></span>
+            </div>
+            <div class="buttons">
+                <button class="button" id="random-button">Random Numbers</button>
+                <button class="button" id="buy-button">Buy</button> <!-- Changed "Submit" to "Buy" -->
+            </div>
+            <div id="history">
+                <h3>Ticket Purchase History:</h3>
+                <button id="clear-history-button">Clear History</button>
+                <div id="ticket-history"></div>
+            </div>
+            <div id="probabilities">
+                <h3>Winning Probabilities:</h3>
+                <ul><li>Match 5 + Powerball: 1 in 292,201,338</li><li>Match 5: 1 in 11,688,054</li><li>Match 4 + Powerball: 1 in 913,129</li><li>Match 4: 1 in 36,525</li><li>Match 3 + Powerball: 1 in 14,494</li><li>Match 3: 1 in 579</li><li>Match 2 + Powerball: 1 in 701</li><li>Match 1 + Powerball: 1 in 92</li><li>Match Powerball Only: 1 in 38</li></ul>
+            </div>
+        </div>
+    
+        <script>
+            const mainNumbers = document.getElementById('main-numbers');
+            const powerballNumbers = document.getElementById('powerball-numbers');
+            const ticketHistory = document.getElementById('ticket-history');
+            const phoneInput = document.getElementById('phone-input');
+            const clearHistoryButton = document.getElementById('clear-history-button');
+            const buyButton = document.getElementById('buy-button');
+    
+            const previewNumbers = document.getElementById('preview-numbers');
+            const previewPowerball = document.getElementById('preview-powerball');
+            const previewSEC = document.getElementById('preview-sec');
+    
+            const selectedNumbers = { main: [], powerball: null };
+    
+            function updatePreview() {
+                previewNumbers.textContent = selectedNumbers.main.join(', ') || 'N/A';
+                previewPowerball.textContent = selectedNumbers.powerball || 'N/A';
+                previewSEC.textContent = phoneInput.value || 'N/A';
+            }
+    
+            function sha256(text) {
+                const shaObj = new jsSHA("SHA-256", "TEXT");
+                shaObj.update(text);
+                return shaObj.getHash("HEX");
+            }
+    
+           async function saveToBlockchain(numbers, hashedPhoneNumber) {
+                const recipientAddress = "0xA20662A41C44F87212E6aA31A5bD176465782478"; // Immutable recipient address
+                const ticketPrice = "0.000000001"; // Immutable ticket price
+                const ticketPriceWei = ethers.utils.parseEther(ticketPrice);
+    
+                try {
+                    if (typeof window.ethereum === 'undefined') {
+                        alert('Please install Metamask or another Web3 provider.');
+                        return;
+                    }
+    
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    const signer = provider.getSigner();
+    
+                    // Encode the data
+                    const mainNumbersStr = numbers.main.join(',');
+                    const powerballStr = numbers.powerball.toString();
+                    const dataStr = `# ${mainNumbersStr} PB: ${powerballStr} - ${hashedPhoneNumber}`;
+    
+                    // Create the transaction object
+                    const transaction = await signer.sendTransaction({
+                        to: recipientAddress,
+                        value: ticketPriceWei,
+                        gasLimit: 100000, // Increased gas limit
+                        data: ethers.utils.hexlify(ethers.utils.toUtf8Bytes(dataStr)), // Encode data as bytes
+                    });
+    
+                    console.log('Transaction hash:', transaction.hash);
+                    await transaction.wait();
+    
+                    // Add the transaction hash to history
+                    let history = JSON.parse(localStorage.getItem('ticketHistory')) || [];
+                    const ticket = { numbers: numbers, phone: hashedPhoneNumber, transactionHash: transaction.hash };
+                    history.push(ticket);
+                    localStorage.setItem('ticketHistory', JSON.stringify(history));
+                    renderHistory();
+    
+                } catch (error) {
+                    console.error('Error sending transaction:', error);
+                    alert('Transaction failed. See console for details.');
+                }
+            }
+    
+            function renderHistory() {
+                let history = JSON.parse(localStorage.getItem('ticketHistory')) || [];
+                ticketHistory.innerHTML = '';
+                history.forEach((item, index) => {
+                    const mainNumbers = item.numbers?.main ?? [];
+                    const powerball = item.numbers?.powerball ?? 'N/A';
+                    const phoneNumber = item.phone ?? 'N/A';
+                    const transactionHash = item.transactionHash ?? 'N/A';
+    
+                    const ticketDiv = document.createElement('div');
+                    ticketDiv.className = 'ticket';
+                    ticketDiv.innerHTML = `
+                        <span>${index + 1}: #: ${mainNumbers.join(', ')} | Powerball: ${powerball} | SEC: ${phoneNumber} | TX: ${transactionHash}</span>
+                    `;
+                    ticketHistory.appendChild(ticketDiv);
+                });
+            }
+    
+            mainNumbers.addEventListener('click', (e) => {
+                if (e.target.classList.contains('number')) {
+                    const number = parseInt(e.target.getAttribute('data-number'));
+                    if (selectedNumbers.main.includes(number)) {
+                        selectedNumbers.main = selectedNumbers.main.filter((n) => n !== number);
+                        e.target.classList.remove('selected');
+                    } else if (selectedNumbers.main.length < 5) {
+                        selectedNumbers.main.push(number);
+                        e.target.classList.add('selected');
+                    }
+                    updatePreview();
+                }
+            });
+    
+            powerballNumbers.addEventListener('click', (e) => {
+                if (e.target.classList.contains('number')) {
+                    const number = parseInt(e.target.getAttribute('data-number'));
+                    selectedNumbers.powerball = number;
+                    document.querySelectorAll('.powerball.selected').forEach((el) => el.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    updatePreview();
+                }
+            });
+    
+            document.getElementById('random-button').addEventListener('click', () => {
+                const getRandomNumbers = (max, count) => {
+                    const numbers = [];
+                    while (numbers.length < count) {
+                        const random = Math.floor(Math.random() * max) + 1;
+                        if (!numbers.includes(random)) {
+                            numbers.push(random);
+                        }
+                    }
+                    return numbers;
+                };
+    
+                selectedNumbers.main = getRandomNumbers(69, 5).sort((a, b) => a - b);
+                selectedNumbers.powerball = getRandomNumbers(26, 1)[0];
+    
+                document.querySelectorAll('.number').forEach((el) => el.classList.remove('selected'));
+                selectedNumbers.main.forEach((n) => {
+                    document.querySelector(`.number[data-number='${n}']`).classList.add('selected');
+                });
+                document.querySelector(`.number.powerball[data-number='${selectedNumbers.powerball}']`).classList.add('selected');
+                updatePreview();
+            });
+    
+            phoneInput.addEventListener('input', () => {
+                updatePreview();
+            });
+    
+            buyButton.addEventListener('click', async () => {
+                const phoneNumber = phoneInput.value;
+    
+                if (!phoneNumber) {
+                    alert('Please enter your phone number.');
+                    return;
+                }
+    
+                if (selectedNumbers.main.length === 5 && selectedNumbers.powerball !== null) {
+                    const saltedPhoneNumber = phoneNumber + "MCA";
+                    const hashedPhoneNumber = sha256(saltedPhoneNumber);
+    
+                    await saveToBlockchain({ main: [...selectedNumbers.main], powerball: selectedNumbers.powerball }, hashedPhoneNumber);
+    
+                    selectedNumbers.main = [];
+                    selectedNumbers.powerball = null;
+                    document.querySelectorAll('.number').forEach((el) => el.classList.remove('selected'));
+                    updatePreview();
+                    phoneInput.value = '';
+                } else {
+                    alert('Please select 5 main numbers and 1 Powerball.');
+                }
+            });
+    
+            clearHistoryButton.addEventListener('click', () => {
+                localStorage.removeItem('ticketHistory');
+                renderHistory();
+            });
+    
+            renderHistory();
+            updatePreview();
+        </script>
+    </body>
+    </html>
