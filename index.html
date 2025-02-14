@@ -377,6 +377,37 @@
             justify-content: center; /* Centrar los botones */
         }
 
+        /* Nueva sección para la vista previa y los botones */
+        #options-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 850px;
+            margin: 20px auto; /* Centrar horizontalmente */
+        }
+
+        #options-container #phone-input-container {
+            width: 300px;
+            max-width: 90%;
+            margin-bottom: 15px;
+            text-align: center; /* Alinea el contenido dentro del contenedor */
+        }
+
+        #options-container #phone-input-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        #options-container .buttons {
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px; /* Añadido para separar los botones del elemento anterior */
+            margin-bottom: 15px; /* Añadido para separar los botones del elemento posterior */
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -417,6 +448,18 @@
             .ticket span {
                 max-width: 50%;
             }
+
+             /* Estilos para la nueva sección en pantallas pequeñas */
+            #options-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #options-container #phone-input-container {
+                width: 100%; /* Ocupar todo el ancho */
+                max-width: none; /* Eliminar el ancho máximo */
+            }
+
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
@@ -430,32 +473,37 @@
             <div id="main-numbers-container">
                <h3>Elije 5 Numberos (1-69):</h3>
                <div id="main-numbers" class="number-grid"></div>
-
-               <div id="preview-container">
-                    <div id="preview-numbers-container">
-                        <!-- Aquí se insertarán los números -->
-                    </div>
-                    <div>
-                    SEC: <span id="preview-sec">N/A</span>
-                    </div>
-                </div>
-
            </div>
 
            <div id="powerball-numbers-container">
                <h3>Elije el Rojo (1-26):</h3>
                <div id="powerball-numbers" class="number-grid"></div>
-
-               <div id="phone-input-container">
-                    <label for="phone-input">Enter your phone number:</label>
-                    <input type="tel" id="phone-input" placeholder="987-654-3210">
-                </div>
-
-                  <div class="buttons">
-                    <button class="button" id="random-button">Random Numbers</button>
-                    <button class="button" id="buy-button">Buy</button>
-                </div>
            </div>
+        </div>
+
+        <!-- Nueva sección para opciones -->
+        <div id="options-container">
+
+            <!-- Botones primero -->
+            <div class="buttons">
+                <button class="button" id="random-button">Random Numbers</button>
+                <button class="button" id="buy-button">Buy</button>
+            </div>
+
+            <div id="preview-container">
+                <div id="preview-numbers-container">
+                <!-- Aquí se insertarán los números -->
+                </div>
+                <div>
+                    SEC: <span id="preview-sec">N/A</span>
+                </div>
+            </div>
+
+            <div id="phone-input-container">
+                <label for="phone-input">Enter your phone number:</label>
+                <input type="tel" id="phone-input" placeholder="987-654-3210">
+            </div>
+
         </div>
 
         <div id="history" class="history">
